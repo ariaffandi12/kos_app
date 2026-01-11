@@ -1,19 +1,48 @@
 name: kos_app
-description: "A new Flutter project."
+description: Aplikasi Manajemen Kos Modern
+
 publish_to: 'none'
-version: 0.1.0
+
+version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  
+  # UI & Icons
+  cupertino_icons: ^1.0.2
+  google_fonts: ^6.1.0
+  flutter_svg: ^2.0.9
+  lottie: ^2.7.0
+  image_picker: ^1.0.5
+  
+  # State Management
+  get: ^4.6.6
+  
+  # Database & Storage
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  shared_preferences: ^2.2.2
+  
+  # Tools
+  intl: ^0.18.1
+  pdf: ^3.10.7
+  file_saver: ^0.2.11
+  
+  # Notifications
+  flutter_local_notifications: ^16.3.0
+  workmanager: ^0.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/lottie/
