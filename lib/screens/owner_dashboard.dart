@@ -7,7 +7,7 @@ import '../services/export_service.dart';
 import '../widgets/status_badge.dart';
 import 'rooms.dart';
 import 'billing.dart';
-import 'complains.dart'; // Import path baru
+import 'complains.dart';
 import 'announcement.dart';
 import 'chat.dart';
 
@@ -33,40 +33,214 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   @override
   Widget build(BuildContext context) {
     final authS = Get.find<AuthService>();
+    final theme = Theme.of(context);
+    final pendingBills = billS.bills.where((b) => b.status != 'paid').length;
     
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+
+      // 1️⃣ APP BAR
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircleAvatar(
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            child: const Icon(Icons.admin_panel_settings, size: 20),
+          ),
+        ),
         title: const Text("Dashboard Owner"),
         actions: [
-          IconButton(icon: const Icon(Icons.picture_as_pdf), onPressed: () {
-             ExportService.exportBillsToPDF(billS.bills, "Laporan_Owner");
-          }),
-          IconButton(icon: const Icon(Icons.announcement), onPressed: () => Get.to(() => const AnnouncementScreen())),
-          IconButton(icon: const Icon(Icons.logout), onPressed: () => Get.find<AuthService>().logout())
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf),
+            onPressed: () => ExportService.exportBillsToPDF(billS.bills, "Laporan_Owner"),
+            tooltip: "Export Laporan",
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => authS.logout(),
+          )
         ],
       ),
-      body: Padding(
+
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 2️⃣ CARD RINGKASAN STATISTIK (Row)
             Row(
               children: [
-                Expanded(child: _buildStatCard("Total Kamar", "${roomS.rooms.length}", Icons.bed, Colors.blue)),
-                const SizedBox(width: 10),
-                Expanded(child: _buildStatCard("Tagihan Aktif", "${billS.bills.where((b) => b.status != 'paid').length}", Icons.money, Colors.orange)),
+                Expanded(
+                  child: _buildStatCard(
+                    title: "Total Kamar",
+                    value: "${roomS.rooms.length}",
+                    icon: Icons.bed_outlined,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    title: "Tagihan Aktif",
+                    value: "${billS.bills.where((b) => b.status != 'paid').length}",
+                    icon: Icons.money_outlined,
+                    color: Colors.orange,
+                  ),
+                ),
               ],
             ),
+
             const SizedBox(height: 20),
-            const Align(alignment: Alignment.centerLeft, child: Text("Menu Utama", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-            const SizedBox(height: 10),
+
+            // 3️⃣ CARD REMINDER (Jika ada tagihan pending)
+            if (pendingBills > 0)
+              Card(
+                color: Colors.orange.shade50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: Colors.orange.shade200),
+                ),
+                elevation: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.notification_important_outlined, color: Colors.orange.shade700, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Perhatian", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text("Ada $pendingBills tagihan menunggu verifikasi.", style: const TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          textStyle: const TextStyle(fontSize: 12),
+                        ),
+                        onPressed: () => Get.to(() => const BillingDetailScreen(isAdmin: true)),
+                        child: const Text("Verifikasi"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 24),
+
+            // 4️⃣ JUDUL SECTION
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
+              child: Text(
+                "Menu Utama",
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface
+                ),
+              ),
+            ),
+            
+            // 5️⃣ MENU UTAMA (Grid)
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.2,
+              children: [
+                _buildMenuGridItem(
+                  title: "Kelola Kamar",
+                  icon: Icons.bed_outlined,
+                  color: Colors.blue,
+                  onTap: () => Get.to(() => const RoomsScreen()),
+                ),
+                _buildMenuGridItem(
+                  title: "Verifikasi Bayar",
+                  icon: Icons.receipt_long_outlined,
+                  color: Colors.orange,
+                  onTap: () => Get.to(() => const BillingDetailScreen(isAdmin: true)),
+                ),
+                _buildMenuGridItem(
+                  title: "Keluhan",
+                  icon: Icons.report_problem_outlined,
+                  color: Colors.blue,
+                  onTap: () => Get.to(() => ComplainsScreen()),
+                ),
+                _buildMenuGridItem(
+                  title: "Pengumuman",
+                  icon: Icons.announcement_outlined,
+                  color: Colors.red,
+                  onTap: () => Get.to(() => const AnnouncementScreen()),
+                ),
+                _buildMenuGridItem(
+                  title: "Chat",
+                  icon: Icons.chat_outlined,
+                  color: Colors.green,
+                  onTap: () => Get.to(() => ChatScreen()),
+                ),
+                _buildMenuGridItem(
+                  title: "Export Laporan",
+                  icon: Icons.file_download_outlined,
+                  color: Colors.purple,
+                  onTap: () => ExportService.exportBillsToPDF(billS.bills, "Laporan_Owner_Extra"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper: Card Statistik (Angka Besar)
+  Widget _buildStatCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
             Expanded(
-              child: GridView(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMenuCard("Kelola Kamar", Icons.bed, () => Get.to(() => const RoomsScreen())),
-                  _buildMenuCard("Verifikasi Bayar", Icons.receipt_long, () => Get.to(() => const BillingDetailScreen(isAdmin: true))),
-                  _buildMenuCard("Keluhan", Icons.report_problem, () => Get.to(() => const ComplainsScreen())), // Class baru
-                  _buildMenuCard("Chat", Icons.chat, () => Get.to(() => const ChatScreen())),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12, 
+                      color: Colors.grey.shade600
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 22, 
+                      fontWeight: FontWeight.bold, // Fokus Utama
+                      color: Colors.black87
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -76,38 +250,43 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  // Helper: Item Menu Grid (Sama dengan Tenant untuk konsistensi)
+  Widget _buildMenuGridItem({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(title, style: const TextStyle(color: Colors.grey)),
-              Icon(icon, color: color, size: 30)
-            ]),
-            const SizedBox(height: 10),
-            Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuCard(String title, IconData icon, VoidCallback onTap) {
-    return Card(
+      elevation: 2,
       child: InkWell(
         onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: Colors.deepPurple),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 32, color: color),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13, 
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

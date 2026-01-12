@@ -26,14 +26,29 @@ class AuthService extends GetxController {
     return false;
   }
 
-  Future<void> register(String name, String email, String password, String role) async {
+  // UPDATE: roomId tidak wajib, bisa null
+  Future<String?> register(String name, String email, String password, String role) async {
     final db = await DBService.instance.database;
+
+    // Cek email duplikat
+    final existing = await db.query('users', where: 'email = ?', whereArgs: [email]);
+    if (existing.isNotEmpty) {
+      return "Email sudah terdaftar!";
+    }
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      return "Semua kolom harus diisi!";
+    }
+
     await db.insert('users', User(
       name: name,
       email: email,
       password: password,
-      role: role
+      role: role,
+      roomId: null // Default null dulu, nanti dipilih lewat menu booking
     ).toMap());
+
+    return null; // Berhasil
   }
 
   Future<void> checkSession() async {
