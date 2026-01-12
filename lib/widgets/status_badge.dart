@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class StatusBadge extends StatelessWidget {
+  final String status;
+  const StatusBadge({super.key, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'paid':
+      case 'done':
+      case 'selesai':
+        color = Colors.green;
+        break;
+      case 'unpaid':
+      case 'pending':
+        color = Colors.orange;
+        break;
+      case 'late':
+      case 'process':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.grey;
+    }
+    return Chip(
+      label: Text(status),
+      backgroundColor: color.withOpacity(0.1),
+      labelStyle: TextStyle(color: color, fontWeight: FontWeight.bold),
     );
   }
 }

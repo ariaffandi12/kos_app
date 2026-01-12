@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kos_app/models/complains.dart';
+import 'package:kos_app/services/auth_service.dart';
 import 'package:kos_app/services/complain_service.dart';
 import 'package:kos_app/widgets/status_badge.dart';
-import '../services/auth_service.dart';
+
 
 class ComplaintsScreen extends StatefulWidget {
   const ComplaintsScreen({super.key});

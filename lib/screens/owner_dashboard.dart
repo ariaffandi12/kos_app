@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../services/billing_service.dart';
-import '../services/room_service.dart';
-import '../services/auth_service.dart';
+import 'package:kos_app/services/auth_service.dart';
+import 'package:kos_app/services/billing_service.dart';
+import 'package:kos_app/services/room_service.dart';
+import 'package:kos_app/widgets/status_badge.dart';
+
 
 class OwnerDashboard extends StatefulWidget {
   const OwnerDashboard({super.key});

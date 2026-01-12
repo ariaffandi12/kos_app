@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.example.kos_app"
-    compileSdk = flutter.compileSdkVersion
+
+    // 🔴 WAJIB 33 (JANGAN 34+)
+    compileSdk = 33
 
     ndkVersion = "27.0.12077973"
 
@@ -14,7 +16,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
 
-        // 🔴 INI WAJIB
+        // 🔴 WAJIB untuk flutter_local_notifications
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -24,10 +26,13 @@ android {
 
     defaultConfig {
         applicationId = "com.example.kos_app"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+
+        // 🔴 AMAN
+        minSdk = 21
+        targetSdk = 33
+
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     buildTypes {
@@ -38,8 +43,8 @@ android {
 }
 
 dependencies {
-    
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // 🔴 WAJIB
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
 
 flutter {
