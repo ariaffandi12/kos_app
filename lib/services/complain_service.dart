@@ -1,27 +1,26 @@
 import 'package:get/get.dart';
-import 'package:kos_app/models/complains.dart';
 import 'package:sqflite/sqflite.dart';
-
+import '../models/complains.dart';
 import 'db_service.dart';
 
-class ComplaintService extends GetxController {
-  final RxList<Complaint> complaints = <Complaint>[].obs;
+class ComplainService extends GetxController {
+  final RxList<Complain> complains = <Complain>[].obs;
 
-  Future<void> fetchComplaints() async {
+  Future<void> fetchComplains() async {
     final db = await DBService.instance.database;
     final result = await db.query('complaints', orderBy: 'id DESC');
-    complaints.value = result.map((e) => Complaint.fromMap(e)).toList();
+    complains.value = result.map((e) => Complain.fromMap(e)).toList();
   }
 
-  Future<void> addComplaint(Complaint complaint) async {
+  Future<void> addComplain(Complain complain) async {
     final db = await DBService.instance.database;
-    await db.insert('complaints', complaint.toMap());
-    fetchComplaints();
+    await db.insert('complaints', complain.toMap());
+    fetchComplains();
   }
 
   Future<void> updateStatus(int id, String status) async {
     final db = await DBService.instance.database;
     await db.update('complaints', {'status': status}, where: 'id = ?', whereArgs: [id]);
-    fetchComplaints();
+    fetchComplains();
   }
 }

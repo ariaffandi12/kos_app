@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
-import 'package:kos_app/models/chat.dart';
 import 'package:sqflite/sqflite.dart';
-
+import '../models/chat.dart';
 import 'db_service.dart';
 
 class ChatService extends GetxController {

@@ -53,7 +53,6 @@ class _ParticleBackgroundState extends State<ParticleBackground>
 }
 
 class Particle {
-  // PERBAIKAN: Menambahkan 'late' karena variabel diinisialisasi di constructor
   late double x, y, vx, vy, size, alpha;
   
   Particle(Random random) {
@@ -74,12 +73,10 @@ class ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // PERBAIKAN: Mengganti withOpacity dengan withValues
     final paint = Paint()..color = Colors.deepPurple.withValues(alpha: 0.2);
     for (var p in particles) {
       var newX = p.x + p.vx * progress * 1000;
       var newY = p.y + p.vy * progress * 1000;
-      // Wrap around logic simple
       if (newX > 1) newX -= 1;
       if (newX < 0) newX += 1;
       if (newY > 1) newY -= 1;

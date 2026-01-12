@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
-import 'package:kos_app/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-
+import '../models/user.dart';
 import 'db_service.dart';
 
 class AuthService extends GetxController {

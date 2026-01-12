@@ -3,7 +3,7 @@ class User {
   final String name;
   final String email;
   final String password;
-  final String role; // 'owner' atau 'tenant'
+  final String role;
   final String? roomId;
 
   User({

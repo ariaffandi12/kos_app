@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kos_app/services/auth_service.dart';
-import 'package:kos_app/services/chat_service.dart';
-
+import '../services/chat_service.dart';
+import '../services/auth_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -12,7 +11,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  // PERBAIKAN: Pastikan sintaks Get.find benar (tanpa spasi berlebih di <>)
   final ChatService chatS = Get.put(ChatService());
   final AuthService authS = Get.find<AuthService>();
   final msgC = TextEditingController();
@@ -38,9 +36,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 itemCount: chatS.chats.length,
                 itemBuilder: (ctx, i) {
                   final chat = chatS.chats[i];
-                  // Logika sederhana untuk menentukan pesan sendiri atau orang lain
-                  // Jika role owner dan sender adalah admin -> send
-                  // Jika role tenant dan sender id sama dengan user id -> send
                   bool isMe = (authS.currentUser.value?.role == 'owner' && chat.senderId == 'admin') ||
                                (authS.currentUser.value?.id.toString() == chat.senderId);
 
@@ -70,9 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () {
                     if (msgC.text.isNotEmpty) {
                       String sender = (authS.currentUser.value?.role == 'owner') ? 'admin' : authS.currentUser.value!.id.toString();
-                      // Logic receiver sederhana: jika owner -> kirim ke user 1, jika user -> kirim ke admin
                       String receiver = (sender == 'admin') ? '1' : 'admin'; 
-                      
                       chatS.sendMessage(sender, receiver, msgC.text);
                       msgC.clear();
                     }

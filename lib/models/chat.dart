@@ -1,6 +1,6 @@
 class Chat {
   final int? id;
-  final String senderId; // 'admin' or user id
+  final String senderId; 
   final String receiverId;
   final String message;
   final String timestamp;

@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kos_app/services/auth_service.dart';
-import 'package:kos_app/services/billing_service.dart';
-import 'package:kos_app/services/room_service.dart';
-import 'package:kos_app/widgets/status_badge.dart';
-
+import '../services/billing_service.dart';
+import '../services/room_service.dart';
+import '../services/auth_service.dart';
+import '../services/export_service.dart';
+import '../widgets/status_badge.dart';
+import 'rooms.dart';
+import 'billing.dart';
+import 'complains.dart'; // Import path baru
+import 'announcement.dart';
+import 'chat.dart';
 
 class OwnerDashboard extends StatefulWidget {
   const OwnerDashboard({super.key});
@@ -22,15 +27,21 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     super.initState();
     billS.fetchBills();
     roomS.fetchRooms();
-    billS.generateBills(); // Simulate auto-billing
+    billS.generateBills();
   }
 
   @override
   Widget build(BuildContext context) {
+    final authS = Get.find<AuthService>();
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text("Dashboard Owner"),
         actions: [
+          IconButton(icon: const Icon(Icons.picture_as_pdf), onPressed: () {
+             ExportService.exportBillsToPDF(billS.bills, "Laporan_Owner");
+          }),
+          IconButton(icon: const Icon(Icons.announcement), onPressed: () => Get.to(() => const AnnouncementScreen())),
           IconButton(icon: const Icon(Icons.logout), onPressed: () => Get.find<AuthService>().logout())
         ],
       ),
@@ -38,7 +49,6 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Statistik
             Row(
               children: [
                 Expanded(child: _buildStatCard("Total Kamar", "${roomS.rooms.length}", Icons.bed, Colors.blue)),
@@ -47,30 +57,18 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
               ],
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("Tagihan Masuk", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ],
-            ),
+            const Align(alignment: Alignment.centerLeft, child: Text("Menu Utama", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
             const SizedBox(height: 10),
             Expanded(
-              child: Obx(() {
-                if (billS.bills.isEmpty) return const Center(child: Text("Belum ada tagihan"));
-                return ListView.builder(
-                  itemCount: billS.bills.length,
-                  itemBuilder: (ctx, index) {
-                    final bill = billS.bills[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text("Tenant ID: ${bill.tenantId} - ${bill.month}"),
-                        subtitle: Text("Rp ${bill.amount}"),
-                        trailing: StatusBadge(status: bill.status),
-                      ),
-                    );
-                  },
-                );
-              }),
+              child: GridView(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.5),
+                children: [
+                  _buildMenuCard("Kelola Kamar", Icons.bed, () => Get.to(() => const RoomsScreen())),
+                  _buildMenuCard("Verifikasi Bayar", Icons.receipt_long, () => Get.to(() => const BillingDetailScreen(isAdmin: true))),
+                  _buildMenuCard("Keluhan", Icons.report_problem, () => Get.to(() => const ComplainsScreen())), // Class baru
+                  _buildMenuCard("Chat", Icons.chat, () => Get.to(() => const ChatScreen())),
+                ],
+              ),
             ),
           ],
         ),
@@ -93,6 +91,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             ]),
             const SizedBox(height: 10),
             Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(String title, IconData icon, VoidCallback onTap) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.deepPurple),
+            const SizedBox(height: 10),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),

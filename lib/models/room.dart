@@ -3,7 +3,7 @@ class Room {
   final String name;
   final double price;
   final String description;
-  final String status; // 'occupied' atau 'empty'
+  final String status;
   final String imagePath;
 
   Room({

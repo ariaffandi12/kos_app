@@ -1,15 +1,13 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:kos_app/models/bill.dart';
-import 'package:kos_app/models/user.dart';
 import 'package:sqflite/sqflite.dart';
-
+import '../models/bill.dart';
+import '../models/user.dart';
 import 'db_service.dart';
 
 class BillingService extends GetxController {
   final RxList<Bill> bills = <Bill>[].obs;
 
-  // Generate tagihan otomatis untuk semua tenant aktif
   Future<void> generateBills() async {
     final db = await DBService.instance.database;
     final users = await db.query('users', where: 'role = ?', whereArgs: ['tenant']);
@@ -17,7 +15,6 @@ class BillingService extends GetxController {
 
     for (var userMap in users) {
       var user = User.fromMap(userMap);
-      // Cek apakah sudah ada tagihan bulan ini
       final existing = await db.query(
         'bills',
         where: 'tenantId = ? AND month = ?',
@@ -25,7 +22,6 @@ class BillingService extends GetxController {
       );
 
       if (existing.isEmpty && user.roomId != null) {
-        // Ambil harga kamar
         final rooms = await db.query(
           'rooms',
           where: 'id = ?',
@@ -50,7 +46,6 @@ class BillingService extends GetxController {
     final result = await db.query('bills', orderBy: 'id DESC');
     bills.value = result.map((e) => Bill.fromMap(e)).toList();
 
-    // Logic Grace Period (> 5 tanggal jadi Late)
     final day = DateTime.now().day;
     if (day > 5) {
       for (var bill in bills) {
@@ -58,7 +53,7 @@ class BillingService extends GetxController {
           await db.update('bills', {'status': 'late'}, where: 'id = ?', whereArgs: [bill.id]);
         }
       }
-      fetchBills(); // Refresh
+      fetchBills();
     }
   }
 

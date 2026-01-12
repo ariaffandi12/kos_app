@@ -1,11 +1,11 @@
-class Complaint {
+class Complain {
   final int? id;
   final String tenantId;
   final String description;
   final String image;
-  final String status; // 'pending', 'process', 'done'
+  final String status; 
 
-  Complaint({
+  Complain({
     this.id,
     required this.tenantId,
     required this.description,
@@ -21,7 +21,7 @@ class Complaint {
     'status': status
   };
 
-  factory Complaint.fromMap(Map<String, dynamic> map) => Complaint(
+  factory Complain.fromMap(Map<String, dynamic> map) => Complain(
     id: map['id'],
     tenantId: map['tenantId'],
     description: map['description'],

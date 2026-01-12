@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:kos_app/services/auth_service.dart';
-import 'package:kos_app/services/billing_service.dart';
-import 'package:kos_app/widgets/status_badge.dart';
-
+import '../services/billing_service.dart';
+import '../services/auth_service.dart';
+import '../widgets/status_badge.dart';
+import 'billing.dart';
+import 'complains.dart'; // Import path baru
+import 'announcement.dart';
+import 'chat.dart';
 
 class TenantDashboard extends StatelessWidget {
   TenantDashboard({super.key});
@@ -13,6 +16,8 @@ class TenantDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     billS.fetchBills();
+    final authS = Get.find<AuthService>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Dashboard Penghuni"),
@@ -42,29 +47,37 @@ class TenantDashboard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Align(alignment: Alignment.centerLeft, child: Text("Tagihan Saya", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-            const SizedBox(height: 10),
             Expanded(
-              child: Obx(() {
-                final myBills = billS.bills; 
-                if (myBills.isEmpty) return const Center(child: Text("Tidak ada tagihan"));
-                return ListView.builder(
-                  itemCount: myBills.length,
-                  itemBuilder: (ctx, i) {
-                    final bill = myBills[i];
-                    return Card(
-                      child: ListTile(
-                        leading: const CircleAvatar(child: Icon(Icons.receipt_long)),
-                        title: Text(bill.month),
-                        subtitle: Text("Rp ${bill.amount}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                        trailing: StatusBadge(status: bill.status),
-                      ),
-                    );
-                  },
-                );
-              }),
+              child: GridView(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 1.5),
+                children: [
+                  _buildMenuCard("Tagihan Saya", Icons.receipt_long, Colors.orange, () => Get.to(() => const BillingDetailScreen(isAdmin: false))),
+                  _buildMenuCard("Pengumuman", Icons.announcement, Colors.red, () => Get.to(() => const AnnouncementScreen())),
+                  _buildMenuCard("Keluhan", Icons.report_problem, Colors.blue, () => Get.to(() => const ComplainsScreen())), // Class baru
+                  _buildMenuCard("Chat Owner", Icons.chat, Colors.green, () => Get.to(() => const ChatScreen())),
+                ],
+              ),
             )
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 30, color: color),
+              const SizedBox(height: 10),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
       ),
     );

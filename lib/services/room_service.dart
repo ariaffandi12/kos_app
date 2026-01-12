@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:kos_app/models/room.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/room.dart';
 import 'db_service.dart';

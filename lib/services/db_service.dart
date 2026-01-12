@@ -1,12 +1,11 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:kos_app/models/user.dart';
-import 'package:kos_app/models/room.dart';
-import 'package:kos_app/models/bill.dart';
-import 'package:kos_app/models/complains.dart';
-import 'package:kos_app/models/chat.dart';
-
-
+import '../models/user.dart';
+import '../models/room.dart';
+import '../models/bill.dart';
+import '../models/complains.dart'; // Import path baru
+import '../models/chat.dart';
+import '../models/announcement.dart';
 
 class DBService {
   static final DBService instance = DBService._init();
@@ -32,7 +31,6 @@ class DBService {
   }
 
   Future _createDB(Database db, int version) async {
-    // 1. Users
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +42,6 @@ class DBService {
       )
     ''');
 
-    // 2. Rooms
     await db.execute('''
       CREATE TABLE rooms (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,7 +53,6 @@ class DBService {
       )
     ''');
 
-    // 3. Bills
     await db.execute('''
       CREATE TABLE bills (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +64,7 @@ class DBService {
       )
     ''');
 
-    // 4. Complaints
+    // Nama tabel tetap 'complaints' untuk database, tapi mapping ke model Complain
     await db.execute('''
       CREATE TABLE complaints (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,7 +75,6 @@ class DBService {
       )
     ''');
 
-    // 5. Chats
     await db.execute('''
       CREATE TABLE chats (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -90,7 +85,15 @@ class DBService {
       )
     ''');
 
-    // Seed Default Owner
+    await db.execute('''
+      CREATE TABLE announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        date TEXT NOT NULL
+      )
+    ''');
+
     await db.insert('users', User(
       name: 'Pak Owner',
       email: 'admin@kos.com',

@@ -3,7 +3,7 @@ class Bill {
   final String tenantId;
   final String month;
   final double amount;
-  final String status; // 'unpaid', 'paid', 'late'
+  final String status;
   final String? proofImage;
 
   Bill({
