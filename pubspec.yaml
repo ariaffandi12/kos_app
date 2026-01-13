@@ -1,7 +1,6 @@
 name: kos_app
-description: Aplikasi Manajemen Kos Modern
+description: A new Flutter project for boarding house management.
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
@@ -11,48 +10,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # =========================
-  # UI & ICONS
-  # =========================
-  cupertino_icons: ^1.0.6
-  google_fonts: ^6.1.0
-  flutter_svg: ^2.0.9
-  lottie: ^3.3.1
-  image_picker: ^1.0.7
+  # UI Components (Default Flutter Icons)
+  cupertino_icons: ^1.0.2
 
-  # =========================
-  # STATE MANAGEMENT
-  # =========================
-  get: ^4.6.6
+  # State Management (WAJIB agar Provider/MultiProvider terbaca)
+  provider: ^6.0.5
 
-  # =========================
-  # DATABASE & STORAGE
-  # =========================
-  sqflite: ^2.3.2
-  path: ^1.9.0
-  shared_preferences: ^2.2.2
+  # Network Requests (WAJIB agar http.post/http.get terbaca)
+  http: ^1.1.0
 
-  # =========================
-  # UTILITIES
-  # =========================
-  intl: ^0.20.2
-  pdf: ^3.10.7
-  file_saver: ^0.3.1
+  # Fitur Kamera & Pilih Gambar (WAJIB agar ImagePicker terbaca)
+  image_picker: ^1.0.4
 
-  # =========================
-  # NOTIFICATIONS (FIX BUG)
-  # =========================
-  flutter_local_notifications: ^19.5.0
-  workmanager: ^0.9.0+3
+  # Load Gambar dari URL (Opsional tapi bagus)
+  cached_network_image: ^3.3.0
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^6.0.0
-
-flutter:
-  uses-material-design: true
-
-  assets:
-    - assets/images/
-    - assets/lottie/
+  # Penyimpanan Sesi Login (Opsional)
+  shared_preferences: ^2.2.1

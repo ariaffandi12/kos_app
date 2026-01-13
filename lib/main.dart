@@ -1,90 +1,107 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
-// Import Services
-import 'services/db_service.dart';
-import 'services/auth_service.dart';
+import 'core/theme.dart';
+import 'data/datasources/remote_datasource.dart';
 
-// Import Screens
-import 'screens/login.dart';
-import 'screens/register.dart';
-import 'screens/owner_dashboard.dart';
-import 'screens/tenant_dashboard.dart';
-import 'screens/rooms.dart';
-import 'screens/billing.dart';
-import 'screens/complains.dart';
-import 'screens/chat.dart';
-import 'screens/announcement.dart';
+// Domain
+import 'domain/usecases/login_user.dart';
+import 'domain/usecases/get_rooms.dart';
+import 'domain/usecases/upload_bill_proof.dart';
+import 'domain/usecases/get_bills.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+// Repositories
+import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/room_repository_impl.dart';
+import 'data/repositories/bill_repository_impl.dart';
 
-  // Inisialisasi Database
-  await DBService.instance.database;
+// Presentation - Providers
+import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/room_provider.dart';
+import 'presentation/providers/bill_provider.dart';
+import 'presentation/providers/complaint_provider.dart';
 
-  // Inisialisasi Notifikasi
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
-  await FlutterLocalNotificationsPlugin().initialize(initializationSettings);
+// Presentation - Pages
+import 'presentation/pages/splash_page.dart';
+import 'presentation/pages/auth/login_page.dart';
+import 'presentation/pages/auth/register_page.dart';
 
-  runApp(const KosApp());
+// Pastikan import ini menggunakan path relatif yang benar
+import 'presentation/pages/owner/owner_dashboard.dart';
+import 'presentation/pages/owner/room_management_page.dart'; 
+import 'presentation/pages/owner/complaint_list_page.dart';
+
+import 'presentation/pages/tenant/tenant_dashboard.dart';
+import 'presentation/pages/tenant/monthly_bill_page.dart';
+import 'presentation/pages/tenant/submit_complaint_page.dart';
+
+import 'presentation/router.dart';
+
+void main() {
+  runApp(MyApp());
 }
 
-class KosApp extends StatelessWidget {
-  const KosApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(AuthService());
+    // --- DEPENDENCY INJECTION (Wiring) ---
+    final remoteDataSource = RemoteDataSource(client: http.Client());
     
-    return GetMaterialApp(
-      title: 'KosManager Pro',
-      debugShowCheckedModeBanner: false,
-      
-      // THEME KONFIGURASI (Material Design 3)
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.deepPurple,
-        fontFamily: 'Poppins',
-        
-        // Menggunakan CardThemeData (Const ini aman)
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          margin: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+    final authRepo = AuthRepositoryImpl(remoteDataSource: remoteDataSource);
+    final roomRepo = RoomRepositoryImpl(remoteDataSource: remoteDataSource);
+    final billRepo = BillRepositoryImpl(remoteDataSource: remoteDataSource);
+
+    final loginUserUseCase = LoginUser(authRepo);
+    final getRoomsUseCase = GetRooms(roomRepo);
+    final uploadProofUseCase = UploadBillProof(billRepo);
+    final getBillsUseCase = GetBills(billRepo);
+
+    return MultiProvider(
+      providers: [
+        // Auth Provider
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(loginUser: loginUserUseCase),
         ),
-        
-        // PERBAIKAN: Hapus 'const' dari AppBarTheme.
-        // Ini menyelesaikan error pada IconThemeData dan TextStyle di dalamnya.
-        appBarTheme: AppBarTheme(
-          centerTitle: true,
-          elevation: 1,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          iconTheme: const IconThemeData(color: Colors.black87, size: 22),
-          titleTextStyle: const TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+        // Room Provider
+        ChangeNotifierProvider(
+          create: (_) => RoomProvider(getRooms: getRoomsUseCase),
+        ),
+        // Bill Provider
+        ChangeNotifierProvider(
+          create: (_) => BillProvider(
+            uploadProof: uploadProofUseCase,
+            getBills: getBillsUseCase,
           ),
         ),
-      ),
-
-      initialRoute: '/login',
-      getPages: [
-        GetPage(name: '/login', page: () => LoginScreen()),
-        GetPage(name: '/register', page: () => RegisterScreen()),
-        GetPage(name: '/owner-dashboard', page: () => OwnerDashboard()),
-        GetPage(name: '/tenant-dashboard', page: () => TenantDashboard()),
-        GetPage(name: '/rooms', page: () => RoomsScreen()),
-        GetPage(name: '/billing', page: () => BillingDetailScreen(isAdmin: false)),
-        GetPage(name: '/complains', page: () => ComplainsScreen()),
-        GetPage(name: '/chat', page: () => ChatScreen()),
-        GetPage(name: '/announcement', page: () => AnnouncementScreen()),
+        // Complaint Provider
+        ChangeNotifierProvider(
+          create: (_) => ComplaintProvider()..fetch(),
+        ),
       ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: appTheme,
+        initialRoute: AppRoutes.splash,
+        routes: {
+          // Auth Routes
+          AppRoutes.splash: (ctx) => SplashPage(),
+          AppRoutes.login: (ctx) => LoginPage(),
+          AppRoutes.register: (ctx) => RegisterPage(),
+
+          // Owner Routes
+          AppRoutes.ownerDashboard: (ctx) => OwnerDashboard(),
+          AppRoutes.roomManagement: (ctx) => RoomManagementPage(), // Sekarang ini terbaca
+          AppRoutes.complaints: (ctx) => ComplaintListPage(),
+
+          // Tenant Routes
+          AppRoutes.tenantDashboard: (ctx) => TenantDashboard(),
+          AppRoutes.bills: (ctx) => MonthlyBillPage(),
+          AppRoutes.submitComplaint: (ctx) => SubmitComplaintPage(),
+        },
+      ),
     );
   }
 }
